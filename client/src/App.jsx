@@ -1,20 +1,29 @@
-import { useState } from "react";
-import Registration from "./Registration";
+import { useContext, useState } from "react";
+import { TokenContext } from "./context/TokenContext";
+
+import Register from "./Register";
 import Login from "./Login";
+import Logout from "./Logout";
 import Dashboard from "./Dashboard";
-import "./App.css";
 
 function App() {
-  const [token, setToken] = useState("");
+  const { token } = useContext(TokenContext);
+
+  const [toggle, setToggle] = useState(false);
 
   return (
     <>
       <h1>Authentication</h1>
+      <hr />
       <div>
-        <Registration />
-        <Login setToken={setToken} />
-        {token && <Dashboard token={token} setToken={setToken} />}
+        {toggle ? <Register /> : <Login />}
+        <hr />
+        <button onClick={() => setToggle((prevToggle) => !prevToggle)}>
+          {toggle ? "Login" : "Register"}
+        </button>
       </div>
+      {token && <Logout />}
+      {token && <Dashboard />}
     </>
   );
 }

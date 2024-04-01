@@ -18,20 +18,16 @@ app.use(cors());
 const PORT = process.env.PORT;
 
 app.get("/", (req, res) => {
-  res.send("HII");
-  console.log("HI!");
+  res.send("Hi");
 });
 
 app.post("/registration", async (req, res) => {
   const { email, username, password } = req.body;
-
   const query = `INSERT INTO users_simple_registation (username, password, email) VALUES ($1, $2, $3) RETURNING *`;
-
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const request = await pool.query(query, [username, hashedPassword, email]);
     const insertedRow = request.rows;
-
     return res.send(insertedRow);
   } catch (error) {
     console.log("The ERROR occured in /register and the ERROR is:", error);
@@ -43,16 +39,14 @@ app.post("/registration", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-
   const user = await findUserByEmail(email);
-
-  const isValidPassword = await bcrypt.compare(password, user.password);
-
-  if (!isValidPassword) {
-    return res.status(401).json({ message: "Invalid credentials" });
+  if (!user) {
+    return res.status(401).json({ message: "No username found" });
   }
-
-  // THE JWT HAS A BODY AKA PAYLOAD
+  const isValidPassword = await bcrypt.compare(password, user.password);
+  if (!isValidPassword) {
+    return res.status(401).json({ message: "Incorrect password" });
+  }
   const token = jwt.sign(
     {
       userId: user.id,
@@ -65,22 +59,17 @@ app.post("/login", async (req, res) => {
       expiresIn: "1h",
     }
   );
-
   res.json({ token });
 });
 
 app.get("/protected", verifyToken, (req, res) => {
-  res.json({ message: "Token is valid." });
+  res.json({ message: "YOU GOT THE PROTECTED MESSAGE WELL DONE 😍" });
 });
 
 app.post("/mood", verifyToken, async (req, res) => {
-  const { userId } = req.decoded;
-  console.log(userId);
+  const { userId } = req.decodedToken;
   const { mood } = req.body;
-  console.log(req.body);
-
   const query = `INSERT INTO to_do (user_id, mood) VALUES ($1, $2) RETURNING *`;
-
   try {
     const request = await pool.query(query, [userId, mood]);
     const insertedRow = request.rows;
@@ -94,12 +83,11 @@ app.post("/mood", verifyToken, async (req, res) => {
 });
 
 app.get("/moods", verifyToken, async (req, res) => {
-  const { userId } = req.decoded;
-  console.log(userId);
+  const { userId } = req.decodedToken;
   const query = `SELECT * FROM to_do WHERE user_id = $1`;
-
   try {
     const request = await pool.query(query, [userId]);
+    // console.log("GET /moods request.rows", request.rows);
     return res.send(request.rows);
   } catch (error) {
     console.error("The ERROR occured in /mood and the ERROR is:", error);
@@ -110,12 +98,10 @@ app.get("/moods", verifyToken, async (req, res) => {
 });
 
 app.get("/users", verifyToken, verifyAdmin, async (req, res) => {
-  // const { userId } = req.decoded;
-  // console.log(userId);
   const query = `SELECT * FROM users_simple_registation`;
-
   try {
     const request = await pool.query(query);
+    // console.log("GET /users request.rows", request.rows);
     return res.send(request.rows);
   } catch (error) {
     console.error("The ERROR occured in /users and the ERROR is:", error);
@@ -124,6 +110,7 @@ app.get("/users", verifyToken, verifyAdmin, async (req, res) => {
     });
   }
 });
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

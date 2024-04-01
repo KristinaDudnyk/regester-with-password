@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function Registration() {
+function Register() {
   const [registrationFormData, setRegistrationFormData] = useState({
     username: "",
     password: "",
@@ -29,11 +29,13 @@ function Registration() {
           email: registrationFormData.email,
         }),
       });
+
       if (!response.ok) {
         throw new Error("fetch /registration failed");
       }
-      const responseBody = await response.json();
-      console.log(responseBody);
+
+      // const responseBody = await response.json();
+
       setRegistrationFormData({ username: "", password: "", email: "" });
     } catch (error) {
       console.log("function auth" + error);
@@ -42,7 +44,7 @@ function Registration() {
 
   return (
     <div>
-      <h1>Registration</h1>
+      <h1>Register</h1>
       <form onSubmit={authSubmit}>
         <input
           name="email"
@@ -69,4 +71,4 @@ function Registration() {
   );
 }
 
-export default Registration;
+export default Register;

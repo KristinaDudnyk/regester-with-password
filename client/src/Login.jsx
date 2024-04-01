@@ -1,21 +1,29 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { TokenContext } from "./context/TokenContext";
 
-function Login({ setToken }) {
+function Login() {
+  const { setToken } = useContext(TokenContext);
+
   const [loginFormData, setLoginFormData] = useState({
     password: "",
     email: "",
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const [error, setError] = useState(null);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
     setLoginFormData((prevLoginFormData) => ({
       ...prevLoginFormData,
       [name]: value,
     }));
   };
 
-  async function authSubmit(e) {
-    e.preventDefault();
+  async function handleLogin(event) {
+    event.preventDefault();
+
+    setError("");
+
     try {
       const response = await fetch("http://localhost:4000/login", {
         method: "POST",
@@ -27,11 +35,18 @@ function Login({ setToken }) {
           "Content-type": "application/json; charset=UTF-8",
         },
       });
+      console.log("handleLogin, response", response);
+
       if (!response.ok) {
-        throw new Error("fetch /login failed");
+        const responseBody = await response.json();
+        setError(responseBody.message);
+        return;
       }
+
       const responseBody = await response.json();
-      console.log(responseBody);
+      console.log("handleLogin, responseBody", responseBody);
+
+      localStorage.setItem("token", responseBody.token);
       setToken(responseBody.token);
     } catch (error) {
       console.log("function auth" + error);
@@ -41,7 +56,7 @@ function Login({ setToken }) {
   return (
     <div>
       <h1>Login</h1>
-      <form onSubmit={authSubmit}>
+      <form onSubmit={handleLogin}>
         <input
           name="email"
           placeholder="react@example.com"
@@ -57,8 +72,7 @@ function Login({ setToken }) {
         />
         <button type="submit">Login</button>
       </form>
-      {/* <h3>data from /auth</h3>
-        <p>{data}</p> */}
+      {error && <p>{error}</p>}
     </div>
   );
 }

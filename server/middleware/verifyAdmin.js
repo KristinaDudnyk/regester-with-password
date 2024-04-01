@@ -1,11 +1,9 @@
 import findUserByID from "../helpers/findUserByID.js";
 
 async function verifyAdmin(req, res, next) {
-  const { userId } = req.decoded;
-  console.log("const { userId } = req.decoded", userId);
-
+  const { userId } = req.decodedToken;
+  // console.log("verifyAdmin, userId", userId);
   const user = await findUserByID(userId);
-
   if (!user.admin || user.admin === undefined) {
     return res
       .status(403)
