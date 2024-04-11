@@ -46,10 +46,11 @@ function Login() {
       const responseBody = await response.json();
       console.log("handleLogin, responseBody", responseBody);
 
-      localStorage.setItem("token", responseBody.token);
-      setToken(responseBody.token);
+      localStorage.setItem("accessToken", responseBody.accessToken);
+
+      setToken(responseBody.accessToken);
     } catch (error) {
-      console.log("function auth" + error);
+      console.log("function handleLogin" + error);
     }
   }
 

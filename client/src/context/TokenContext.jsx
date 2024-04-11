@@ -13,7 +13,7 @@ export const TokenContextProvider = ({ children }) => {
   const [token, setToken] = useState(null);
 
   useEffect(() => {
-    const tokenFromLocalStorage = localStorage.getItem("token");
+    const tokenFromLocalStorage = localStorage.getItem("accessToken");
     // console.log("TokenContextProvider, useEffect, local storage token", token);
 
     // CHECK IF THE TOKEN IS EXPIRED
@@ -24,7 +24,7 @@ export const TokenContextProvider = ({ children }) => {
   }, []);
 
   const logout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
     setToken(null);
   };
 

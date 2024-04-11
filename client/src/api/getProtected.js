@@ -8,7 +8,7 @@ const getProtected = async (token, setProtectedMessage) => {
     // console.log("getProtected, response", response);
 
     if (!response.ok) {
-      throw new Error("SOME ERROR");
+      throw new Error("response is not ok");
     }
 
     const responseBody = await response.json();

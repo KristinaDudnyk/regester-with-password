@@ -8,7 +8,7 @@ const getAllMoods = async (token, setMoods) => {
     // console.log("getAllMoods, response", response);
 
     if (!response.ok) {
-      throw new Error("fuck you bitch");
+      throw new Error("response is not ok");
     }
 
     const responseBody = await response.json();

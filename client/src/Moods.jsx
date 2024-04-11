@@ -20,7 +20,6 @@ const Moods = () => {
 
   const handleSubmit = (event) => {
     postMood(event, token, newMoodData, setNewMoodData);
-    // setTimeout(() => {}, 1000);
     getAllMoods(token, setMoods);
   };
 

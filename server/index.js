@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import cors from "cors";
 import express from "express";
+import cookieParser from "cookie-parser";
 import pool from "./pool.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -13,6 +14,7 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors());
 
 const PORT = process.env.PORT;
@@ -47,7 +49,7 @@ app.post("/login", async (req, res) => {
   if (!isValidPassword) {
     return res.status(401).json({ message: "Incorrect password" });
   }
-  const token = jwt.sign(
+  const accessToken = jwt.sign(
     {
       userId: user.id,
       username: user.username,
@@ -56,14 +58,33 @@ app.post("/login", async (req, res) => {
     },
     process.env.JWT_SECRET_KEY,
     {
-      expiresIn: "1h",
+      expiresIn: "10m",
     }
   );
-  res.json({ token });
+
+  const refreshToken = jwt.sign(
+    {
+      userId: user.id,
+      username: user.username,
+      email: user.email,
+      admin: user.admin,
+    },
+    process.env.JWT_REFRESH_TOKEN_SECRET,
+    {
+      expiresIn: "7d",
+    }
+  );
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: false,
+    sameSite: "strict",
+    path: "/refreshToken",
+  });
+  res.json({ accessToken });
 });
 
 app.get("/protected", verifyToken, (req, res) => {
-  res.json({ message: "YOU GOT THE PROTECTED MESSAGE WELL DONE 😍" });
+  res.json({ message: "YOU GOT THE PROTECTED MESSAGE 😍" });
 });
 
 app.post("/mood", verifyToken, async (req, res) => {
